@@ -48,6 +48,13 @@ attitude = LofOffset(inertial_frame, LOFType.LVLH)
 EARTH_RADIUS = Constants.WGS84_EARTH_EQUATORIAL_RADIUS
 MU = Constants.WGS84_EARTH_MU
 
+dir = "results"
+# Check whether the specified path exists or not
+isExist = os.path.exists(dir)
+if not isExist:
+   os.makedirs("results/reward")
+   os.makedirs("results/state")
+
 class OrekitEnv(gym.Env):
     """
     This class uses Orekit to create an environment to propagate a satellite
@@ -508,7 +515,8 @@ class OrekitEnv(gym.Env):
 
     def write_state(self):
         # State file
-        with open(str(self.id)+"_state_equinoctial_"+str(self.episode_num)+"_"+datetime.datetime.now().strftime('%Y-%m-%d_%H:%M:%S'), "w") as f:
+        # with open(str(self.id)+"_state_equinoctial_"+str(self.episode_num)+"_"+datetime.datetime.now().strftime('%Y-%m-%d_%H:%M:%S'), "w") as f:
+        with open("results/state/"+str(self.id)+"_state_equinoctial_"+str(self.episode_num), "w") as f:
             #Add episode number line 1
             f.write("Episode: " + str(self.episode_num) + '\n')
             for i in range(len(self.a_orbit)):
@@ -520,7 +528,7 @@ class OrekitEnv(gym.Env):
                     print("Writing '-' in place")
                     f.write('-\n')
         # State file
-        with open(str(self.id)+"_state_kepler_"+str(self.episode_num)+"_"+datetime.datetime.now().strftime('%Y-%m-%d_%H:%M:%S'), "w") as f:
+        with open(str(self.id)+"_state_kepler", "w") as f:
             #Add episode number line 1
             f.write("Episode: " + str(self.episode_num) + '\n')
             for i in range(len(self.a_orbit)):
@@ -532,7 +540,7 @@ class OrekitEnv(gym.Env):
                     # f.write('-\n')
 
         # Action file
-        with open(str(self.id)+"_actions_"+str(self.episode_num)+"_"+datetime.datetime.now().strftime('%Y-%m-%d_%H:%M:%S'), 'w') as f:
+        with open(str(self.id)+"_actions_"+str(self.episode_num), 'w') as f:
             for i in range(len(self.actions)):
                 for j in range(3):
                     try:
@@ -545,7 +553,7 @@ class OrekitEnv(gym.Env):
       
 
     def write_reward(self):
-        with open(str(self.id)+"_reward_"+datetime.datetime.now().strftime('%Y-%m-%d_%H:%M:%S'), "w") as f:
+        with open("results/reward/"+str(self.id)+"_reward", "w") as f:
             for reward in self.episode_reward:
                 f.write(str(reward)+'\n')
 

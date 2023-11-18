@@ -23,14 +23,14 @@ n_actions = env.action_space.shape[-1]
 action_noise = NormalActionNoise(mean=np.zeros(n_actions), sigma=0.1 * np.ones(n_actions))
 
 # Create the TD3 model
-model = TD3("MlpPolicy", env, action_noise=action_noise, verbose=1, device="cpu")
+model = TD3("MlpPolicy", env, action_noise=action_noise, verbose=1, device="cpu", tau=0.01)
 
 # Options for loading existing model
 # model = TD3.load("td3_model", device="cpu")
 # model.set_env(env)
 
 # Train & save model
-model.learn(total_timesteps=200000, log_interval=10)
+model.learn(total_timesteps=415000, log_interval=10)
 model.save(str(env.id)+"td3_model")
 
 # Generate .txt of reward/episode trained

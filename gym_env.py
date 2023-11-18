@@ -54,6 +54,7 @@ isExist = os.path.exists(dir)
 if not isExist:
    os.makedirs("results/reward")
    os.makedirs("results/state")
+   os.makedirs("results/action")
 
 class OrekitEnv(gym.Env):
     """
@@ -515,7 +516,6 @@ class OrekitEnv(gym.Env):
 
     def write_state(self):
         # State file
-        # with open(str(self.id)+"_state_equinoctial_"+str(self.episode_num)+"_"+datetime.datetime.now().strftime('%Y-%m-%d_%H:%M:%S'), "w") as f:
         with open("results/state/"+str(self.id)+"_state_equinoctial_"+str(self.episode_num), "w") as f:
             #Add episode number line 1
             f.write("Episode: " + str(self.episode_num) + '\n')
@@ -528,7 +528,7 @@ class OrekitEnv(gym.Env):
                     print("Writing '-' in place")
                     f.write('-\n')
         # State file
-        with open(str(self.id)+"_state_kepler", "w") as f:
+        with open("results/state/"+str(self.id)+"_state_kepler_"+str(self.episode_num), "w") as f:
             #Add episode number line 1
             f.write("Episode: " + str(self.episode_num) + '\n')
             for i in range(len(self.a_orbit)):
@@ -540,7 +540,7 @@ class OrekitEnv(gym.Env):
                     # f.write('-\n')
 
         # Action file
-        with open(str(self.id)+"_actions_"+str(self.episode_num), 'w') as f:
+        with open("results/action/"+str(self.id)+"_action_"+str(self.episode_num), 'w') as f:
             for i in range(len(self.actions)):
                 for j in range(3):
                     try:

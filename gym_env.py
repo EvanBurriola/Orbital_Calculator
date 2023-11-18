@@ -100,13 +100,15 @@ class OrekitEnv(gym.Env):
         self.episode_num = 0
         # List of rewards/episode over entire lifetime of env instance
         self.episode_reward = []
+        #List of actions and thrust magnitudes
+        self.actions = []
+        self.thrust_mags = []
 
         # Fuel params
         self.dry_mass = mass[0]
         self.fuel_mass = mass[1]
         self.cuf_fuel_mass = self.fuel_mass
         self.initial_mass = self.dry_mass + self.fuel_mass
-
 
         # Accpetance tolerance
         self._orbit_tolerance = {'a': 10000, 'ex': 0.01, 'ey': 0.01, 'hx': 0.001, 'hy': 0.001, 'lv': 0.01}
@@ -322,6 +324,9 @@ class OrekitEnv(gym.Env):
         self.hxdot_orbit = []
         self.hydot_orbit = []
 
+        self.actions = []
+        self.thrust_mags = []
+
         state = np.array([self._orbit.getA() / self.r_target_state[0],
                           self._orbit.getEquinoctialEx(),
                           self._orbit.getEquinoctialEy(),
@@ -396,6 +401,9 @@ class OrekitEnv(gym.Env):
         self.hx_orbit.append(currentState.getHx())
         self.hy_orbit.append(currentState.getHy())
         self.lv_orbit.append(currentState.getLv())
+
+        self.actions.append(thrust)
+        self.thrust_mags.append(thrust_mag)
 
         # Calc reward / termination state for this step
         reward, done = self.dist_reward(thrust)
@@ -477,6 +485,7 @@ class OrekitEnv(gym.Env):
         return reward, done
 
     def write_state(self):
+        # State file
         with open(str(self.id)+"_state_"+str(self.episode_num)+"_"+datetime.datetime.now().strftime('%Y-%m-%d_%H:%M:%S'), "w") as f:
             #Add episode number line 1
             f.write("Episode: " + str(self.episode_num) + '\n')
@@ -488,6 +497,18 @@ class OrekitEnv(gym.Env):
                     print("Unexpected error")
                     print("Writing '-' in place")
                     f.write('-\n')
+        # Action file
+        with open(str(self.id)+"_actions_"+str(self.episode_num)+"_"+datetime.datetime.now().strftime('%Y-%m-%d_%H:%M:%S'), 'w') as f:
+            for i in range(len(self.actions)):
+                for j in range(3):
+                    try:
+                        f.write(str(self.actions[i][j])+",")
+                    except Exception as err:
+                        print("Unexpected error")
+                        print("Writing '-' in place")
+                        f.write('-\n')
+                f.write(str(self.thrust_mags[i])+'\n')
+
             # To write in Keplerian form
             # orbit = KeplerianOrbit(self._currentOrbit)
             # for i in range(len(self.a_orbit)):

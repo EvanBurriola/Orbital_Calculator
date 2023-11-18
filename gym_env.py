@@ -79,6 +79,7 @@ class OrekitEnv(gym.Env):
         super(OrekitEnv, self).__init__()
         # ID for reward/state output files
         self.id = random.randint(1,100000)
+        self.alg = ""
 
         # state params
         self.px = []
@@ -507,7 +508,7 @@ class OrekitEnv(gym.Env):
         if self._extrap_Date.compareTo(self.final_date) >= 0:
             reward = -1
             print("Out of time")
-            # self.write_state()
+            self.write_state()
             done = True
 
         self.total_reward += reward
@@ -516,7 +517,7 @@ class OrekitEnv(gym.Env):
 
     def write_state(self):
         # State file
-        with open("results/state/"+str(self.id)+"_state_equinoctial_"+str(self.episode_num), "w") as f:
+        with open("results/state/"+str(self.id)+"_"+self.alg+"_state_equinoctial_"+str(self.episode_num), "w") as f:
             #Add episode number line 1
             f.write("Episode: " + str(self.episode_num) + '\n')
             for i in range(len(self.a_orbit)):
@@ -528,7 +529,7 @@ class OrekitEnv(gym.Env):
                     print("Writing '-' in place")
                     f.write('-\n')
         # State file
-        with open("results/state/"+str(self.id)+"_state_kepler_"+str(self.episode_num), "w") as f:
+        with open("results/state/"+str(self.id)+"_"+self.alg+"_state_kepler_"+str(self.episode_num), "w") as f:
             #Add episode number line 1
             f.write("Episode: " + str(self.episode_num) + '\n')
             for i in range(len(self.a_orbit)):
@@ -540,7 +541,7 @@ class OrekitEnv(gym.Env):
                     # f.write('-\n')
 
         # Action file
-        with open("results/action/"+str(self.id)+"_action_"+str(self.episode_num), 'w') as f:
+        with open("results/action/"+str(self.id)+"_"+self.alg+"_action_"+str(self.episode_num), 'w') as f:
             for i in range(len(self.actions)):
                 for j in range(3):
                     try:
@@ -553,7 +554,7 @@ class OrekitEnv(gym.Env):
       
 
     def write_reward(self):
-        with open("results/reward/"+str(self.id)+"_reward", "w") as f:
+        with open("results/reward/"+str(self.id)+"_"+self.alg+"_reward", "w") as f:
             for reward in self.episode_reward:
                 f.write(str(reward)+'\n')
 

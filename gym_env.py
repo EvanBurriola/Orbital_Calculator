@@ -83,6 +83,13 @@ class OrekitEnv(gym.Env):
         self.hy_orbit = []
         self.lv_orbit = []
 
+        # Kepler
+        self.e_orbit = []
+        self.i_orbit = []
+        self.w_orbit = []
+        self.omega_orbit = []
+        self.v_orbit = []
+
         self.adot_orbit = []
         self.exdot_orbit = []
         self.eydot_orbit = []
@@ -197,7 +204,7 @@ class OrekitEnv(gym.Env):
         set_orbit = KeplerianOrbit(a, e, i, omega, raan, lM,
                                    aDot, eDot, iDot, paDot, rannDot, anomalyDot,
                                    PositionAngle.TRUE, inertial_frame, date, MU)
-
+          
         if target:
             self._targetOrbit = set_orbit
         else:
@@ -324,6 +331,13 @@ class OrekitEnv(gym.Env):
         self.hxdot_orbit = []
         self.hydot_orbit = []
 
+        # Kepler
+        self.e_orbit = []
+        self.i_orbit = []
+        self.w_orbit = []
+        self.omega_orbit = []
+        self.v_orbit = []
+
         self.actions = []
         self.thrust_mags = []
 
@@ -401,6 +415,14 @@ class OrekitEnv(gym.Env):
         self.hx_orbit.append(currentState.getHx())
         self.hy_orbit.append(currentState.getHy())
         self.lv_orbit.append(currentState.getLv())
+
+        k_orbit = self.convert_to_keplerian(self._currentOrbit)
+
+        self.e_orbit.append(k_orbit.getE())
+        self.i_orbit.append(k_orbit.getI())
+        self.w_orbit.append(k_orbit.getPerigeeArgument())
+        self.omega_orbit.append(k_orbit.getRightAscensionOfAscendingNode())
+        self.v_orbit.append(k_orbit.getTrueAnomaly())
 
         self.actions.append(thrust)
         self.thrust_mags.append(thrust_mag)
@@ -486,7 +508,7 @@ class OrekitEnv(gym.Env):
 
     def write_state(self):
         # State file
-        with open(str(self.id)+"_state_"+str(self.episode_num)+"_"+datetime.datetime.now().strftime('%Y-%m-%d_%H:%M:%S'), "w") as f:
+        with open(str(self.id)+"_state_equinoctial_"+str(self.episode_num)+"_"+datetime.datetime.now().strftime('%Y-%m-%d_%H:%M:%S'), "w") as f:
             #Add episode number line 1
             f.write("Episode: " + str(self.episode_num) + '\n')
             for i in range(len(self.a_orbit)):
@@ -497,6 +519,18 @@ class OrekitEnv(gym.Env):
                     print("Unexpected error")
                     print("Writing '-' in place")
                     f.write('-\n')
+        # State file
+        with open(str(self.id)+"_state_kepler_"+str(self.episode_num)+"_"+datetime.datetime.now().strftime('%Y-%m-%d_%H:%M:%S'), "w") as f:
+            #Add episode number line 1
+            f.write("Episode: " + str(self.episode_num) + '\n')
+            for i in range(len(self.a_orbit)):
+                try:
+                    f.write(str(self.a_orbit[i]-EARTH_RADIUS)+","+str(degrees(self.e_orbit[i]))+","+str(degrees(self.i_orbit[i]))+","\
+                            +str(degrees(self.w_orbit[i]))+","+str(degrees(self.omega_orbit[i]))+","+str(degrees(self.v_orbit[i]))+'\n')
+                except Exception as err:
+                    print("Unexpected error", err)
+                    # f.write('-\n')
+
         # Action file
         with open(str(self.id)+"_actions_"+str(self.episode_num)+"_"+datetime.datetime.now().strftime('%Y-%m-%d_%H:%M:%S'), 'w') as f:
             for i in range(len(self.actions)):
@@ -508,17 +542,7 @@ class OrekitEnv(gym.Env):
                         print("Writing '-' in place")
                         f.write('-\n')
                 f.write(str(self.thrust_mags[i])+'\n')
-
-            # To write in Keplerian form
-            # orbit = KeplerianOrbit(self._currentOrbit)
-            # for i in range(len(self.a_orbit)):
-            #     try:
-            #         f.write(str(orbit.getA()/1e3)+","+str(orbit.getE())+","+str(orbit.getI())+","+str(orbit.getPerigeeArgument())+","+ \
-            #             str(orbit.getRightAscensionOfAscendingNode())+","+str(orbit.getTrueAnomaly())+'\n')
-            #     except Exception as err:
-            #         print("Unexpected error")
-            #         print("Writing '-' in place")
-            #         f.write('-\n')            
+      
 
     def write_reward(self):
         with open(str(self.id)+"_reward_"+datetime.datetime.now().strftime('%Y-%m-%d_%H:%M:%S'), "w") as f:

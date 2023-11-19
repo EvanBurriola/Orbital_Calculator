@@ -534,7 +534,7 @@ class OrekitEnv(gym.Env):
             f.write("Episode: " + str(self.episode_num) + '\n')
             for i in range(len(self.a_orbit)):
                 try:
-                    f.write(str(self.a_orbit[i]-EARTH_RADIUS)+","+str(degrees(self.e_orbit[i]))+","+str(degrees(self.i_orbit[i]))+","\
+                    f.write(str(self.a_orbit[i]-EARTH_RADIUS)+","+str(self.e_orbit[i])+","+str(degrees(self.i_orbit[i]))+","\
                             +str(degrees(self.w_orbit[i]))+","+str(degrees(self.omega_orbit[i]))+","+str(degrees(self.v_orbit[i]))+'\n')
                 except Exception as err:
                     print("Unexpected error", err)

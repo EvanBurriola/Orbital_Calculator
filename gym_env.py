@@ -508,7 +508,7 @@ class OrekitEnv(gym.Env):
         if self._extrap_Date.compareTo(self.final_date) >= 0:
             reward = -1
             print("Out of time")
-            self.write_state()
+            # self.write_state()
             done = True
 
         self.total_reward += reward

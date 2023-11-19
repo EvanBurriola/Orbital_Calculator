@@ -55,6 +55,7 @@ if not isExist:
    os.makedirs("results/reward")
    os.makedirs("results/state")
    os.makedirs("results/action")
+   os.makedirs("models")
 
 class OrekitEnv(gym.Env):
     """
@@ -517,7 +518,7 @@ class OrekitEnv(gym.Env):
 
     def write_state(self):
         # State file
-        with open("results/state/"+str(self.id)+"_"+self.alg+"_state_equinoctial_"+str(self.episode_num), "w") as f:
+        with open("results/state/"+str(self.id)+"_"+self.alg+"_state_equinoctial_"+str(self.episode_num)+".txt", "w") as f:
             #Add episode number line 1
             f.write("Episode: " + str(self.episode_num) + '\n')
             for i in range(len(self.a_orbit)):
@@ -529,7 +530,7 @@ class OrekitEnv(gym.Env):
                     print("Writing '-' in place")
                     f.write('-\n')
         # State file
-        with open("results/state/"+str(self.id)+"_"+self.alg+"_state_kepler_"+str(self.episode_num), "w") as f:
+        with open("results/state/"+str(self.id)+"_"+self.alg+"_state_kepler_"+str(self.episode_num)+".txt", "w") as f:
             #Add episode number line 1
             f.write("Episode: " + str(self.episode_num) + '\n')
             for i in range(len(self.a_orbit)):
@@ -541,7 +542,7 @@ class OrekitEnv(gym.Env):
                     # f.write('-\n')
 
         # Action file
-        with open("results/action/"+str(self.id)+"_"+self.alg+"_action_"+str(self.episode_num), 'w') as f:
+        with open("results/action/"+str(self.id)+"_"+self.alg+"_action_"+str(self.episode_num)+".txt", 'w') as f:
             for i in range(len(self.actions)):
                 for j in range(3):
                     try:
@@ -554,7 +555,7 @@ class OrekitEnv(gym.Env):
       
 
     def write_reward(self):
-        with open("results/reward/"+str(self.id)+"_"+self.alg+"_reward", "w") as f:
+        with open("results/reward/"+str(self.id)+"_"+self.alg+"_reward"+".txt", "w") as f:
             for reward in self.episode_reward:
                 f.write(str(reward)+'\n')
 

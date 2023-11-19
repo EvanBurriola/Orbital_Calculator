@@ -44,7 +44,7 @@ env.alg = alg
 # model.set_env(env)
 
 # Train & save model
-model.learn(total_timesteps=600000, log_interval=10)
+model.learn(total_timesteps=415000, log_interval=10)
 model.save('models/'+str(env.id)+"_"+ alg +"_model")
 
 # Generate .txt of reward/episode trained

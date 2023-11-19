@@ -543,6 +543,7 @@ class OrekitEnv(gym.Env):
 
         # Action file
         with open("results/action/"+str(self.id)+"_"+self.alg+"_action_"+str(self.episode_num)+".txt", 'w') as f:
+            f.write("Fuel Mass: " + str(self.cuf_fuel_mass) + "/" + str(self.fuel_mass) + '\n')
             for i in range(len(self.actions)):
                 for j in range(3):
                     try:

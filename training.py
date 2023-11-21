@@ -2,7 +2,6 @@ import sys
 import numpy as np
 from stable_baselines3 import TD3, DDPG
 from stable_baselines3.common.noise import NormalActionNoise
-from gym.spaces import Box
 from gym_env import OrekitEnv
 
 # Page 35 RP(A Reinforcement Learning Approach to Spacecraft Trajectory);

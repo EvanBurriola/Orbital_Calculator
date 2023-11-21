@@ -2,25 +2,21 @@ import gym
 from gym import spaces
 
 import orekit
-from math import radians, degrees, sqrt, pi
+from math import radians, degrees
 import datetime
-import matplotlib.pyplot as plt
-from mpl_toolkits.mplot3d import Axes3D
 import numpy as np
 import os, random
 
 orekit.initVM()
 
-from org.orekit.frames import FramesFactory, Frame
+from org.orekit.frames import FramesFactory
 from org.orekit.bodies import OneAxisEllipsoid
-from org.orekit.orbits import KeplerianOrbit, Orbit
+from org.orekit.orbits import KeplerianOrbit
 from org.orekit.propagation import SpacecraftState
-from org.orekit.propagation.analytical import KeplerianPropagator
 from org.orekit.time import AbsoluteDate, TimeScalesFactory
 from org.hipparchus.ode.nonstiff import DormandPrince853Integrator
 from org.hipparchus.geometry.euclidean.threed import Vector3D
 from org.orekit.propagation.numerical import NumericalPropagator
-from org.orekit.propagation.sampling import OrekitFixedStepHandler
 from org.orekit.orbits import OrbitType, PositionAngle
 from org.orekit.forces.gravity.potential import GravityFieldFactory
 from org.orekit.forces.gravity import HolmesFeatherstoneAttractionModel
@@ -28,13 +24,11 @@ from org.orekit.utils import IERSConventions, Constants
 from org.orekit.forces.maneuvers import ConstantThrustManeuver
 from org.orekit.frames import LOFType
 from org.orekit.attitudes import LofOffset
-from org.orekit.python import PythonEventHandler, PythonOrekitFixedStepHandler
 from orekit.pyhelpers import setup_orekit_curdir  
 from org.orekit.forces.gravity import NewtonianAttraction
 from org.orekit.utils import Constants
 
 from org.hipparchus.geometry.euclidean.threed import Vector3D
-from java.util import Arrays
 from orekit import JArray_double
 
 # Loads orekit-data.zip from current directory
@@ -237,7 +231,7 @@ class OrekitEnv(gym.Env):
         # print(f'{sc_state.getMass()}')
         self._sc_fuel = sc_state.addAdditionalState (FUEL_MASS, fuel_mass)
 
-    def create_Propagator(self, prop_master_mode=False):
+    def create_Propagator(self):
         """
         Creates and initializes the propagator
         :param prop_master_mode: Set propagator to slave of master mode (slave default)
@@ -262,12 +256,7 @@ class OrekitEnv(gym.Env):
         numProp.setMu(MU)
         numProp.setOrbitType(OrbitType.KEPLERIAN)
 
-        if prop_master_mode:
-            output_step = 5.0
-            handler = OutputHandler()
-            numProp.setMasterMode(output_step, handler)
-        else:
-            numProp.setSlaveMode()
+        numProp.setSlaveMode()
 
         self._prop = numProp
         self._prop.setAttitudeProvider(attitude)
@@ -559,31 +548,3 @@ class OrekitEnv(gym.Env):
         with open("results/reward/"+str(self.id)+"_"+self.alg+"_reward"+".txt", "w") as f:
             for reward in self.episode_reward:
                 f.write(str(reward)+'\n')
-
-
-class OutputHandler(PythonOrekitFixedStepHandler):
-    """
-    Implements a custom handler for every value
-    """
-    def init(self, s0, t):
-        """
-        Initilization at every prpagation step
-        :param s0: initial state (spacecraft State)
-        :param t: initial time (int)
-        :return:
-        """
-        print('Orbital Elements:')
-
-    def handleStep(self, currentState, isLast):
-        """
-        Perform a step at every propagation step
-        :param currentState: current spacecraft state (Spacecraft state)
-        :param isLast: last step in the propagation (bool)
-        :return:
-        """
-        o = OrbitType.KEPLERIAN.convertType(currentState.getOrbit())
-        print(o.getDate())
-        print('a:{:5.3f}, e:{:5.3f}, i:{:5.3f}, theta:{:5.3f}'.format(o.getA(), o.getE(),
-                                                                      degrees(o.getI()), degrees(o.getLv())))
-        if isLast:
-            print('this was the last step ')

@@ -11,11 +11,11 @@ def is_dir_exist(file_id):
 
 
 def process_files(file_list, plot_function, id):
-    # Convert file type - 'ValueError: txt is not supported'
-    for file in file_list:
-        file_wo_extension, _ = os.path.splitext(file)
-        os.rename(file, file_wo_extension)
-        plot_function(file_wo_extension, id)
+  # Convert file type - 'ValueError: txt is not supported'
+  for file in file_list:
+      file_wo_extension, _ = os.path.splitext(file)
+      os.rename(file, file_wo_extension)
+      plot_function(file_wo_extension, id)
 
 
 def plot_reward(file, id):
@@ -123,27 +123,27 @@ def plot_action(file, id):
 
 
 def main():
-    n = len(sys.argv)
-    if(n < 2):
-        print("Usage: python3 plot.py [model_id]")
-        sys.exit()
+  n = len(sys.argv)
+  if(n < 2):
+      print("Usage: python3 plot.py [model_id]")
+      sys.exit()
 
-    id = sys.argv[1]
-    reward_file = glob(f'../reward/*{id}*_reward.txt')
+  id = sys.argv[1]
+  reward_file = glob(f'../reward/*{id}*_reward.txt')
 
-    # Error checking to ensure that model id exist
-    if not reward_file:
-      print('Invalid model number.')
-      return
-    
-    is_dir_exist(id)
-    state_files = [file for file in glob(f'../state/*{id}*/**') if 'kepler' not in file]
-    action_files = glob(f'../action/*{id}*/**')
+  # Error checking to ensure that model id exist
+  if not reward_file:
+    print('Invalid model number.')
+    return
+  
+  is_dir_exist(id)
+  state_files = [file for file in glob(f'../state/*{id}*/**') if 'kepler' not in file]
+  action_files = glob(f'../action/*{id}*/**')
 
-    process_files(reward_file, plot_reward, id)
-    process_files(state_files, plot_state, id)
-    process_files(action_files, plot_action, id)
+  process_files(reward_file, plot_reward, id)
+  process_files(state_files, plot_state, id)
+  process_files(action_files, plot_action, id)
 
 
 if __name__ == "__main__":
-    main()
+  main()

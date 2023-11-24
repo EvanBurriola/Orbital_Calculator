@@ -1,5 +1,5 @@
 # Orbital Trajectory Calculator
-![](https://github.com/EvanBurriola/Orbital_Calculator/tree/main/results/orbit_visualizer.gif)
+![](https://github.com/EvanBurriola/Orbital_Calculator/blob/main/results/orbit_visualizer.gif)
 
 ## Creating Environment
 	 conda env create -f conda_env.yml

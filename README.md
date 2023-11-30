@@ -2,7 +2,7 @@
 
 An implementation of a novel approach to the way satellite trajectory changes are performed. Utilizing Reinforcement Learning, specifically the Twin Delayed DDPG (TD3) algorithm, to develop continuous and high precision orbitial transfer actions. An extension of "A Reinforcment Learning Approach to Spacecraft Trajectory Optimization" research by Daniel S. Kolosa.
 
-![](https://github.com/EvanBurriola/Orbital_Calculator/blob/main/results/orbit_visualizer.gif)
+https://github.com/EvanBurriola/Orbital_Calculator/assets/102999674/37363c21-825d-4d9d-b894-dcf6af54090a
 
 ## Dependencies
 

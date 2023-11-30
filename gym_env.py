@@ -1,3 +1,6 @@
+# An adaptation of the Satmind environment from A Reinforcement Learning Approach to Spacecraft Trajectory
+# Converts original implementation into a valid OpenAI gym environment
+
 import gym
 from gym import spaces
 
@@ -36,6 +39,7 @@ setup_orekit_curdir()
 
 FUEL_MASS = "Fuel Mass"
 
+# Set constants
 UTC = TimeScalesFactory.getUTC()
 inertial_frame = FramesFactory.getEME2000()
 attitude = LofOffset(inertial_frame, LOFType.LVLH)
@@ -51,6 +55,7 @@ if not isExist:
    os.makedirs("results/action")
    os.makedirs("models")
 
+# Inherit from OpenAI gym
 class OrekitEnv(gym.Env):
     """
     This class uses Orekit to create an environment to propagate a satellite
@@ -72,7 +77,7 @@ class OrekitEnv(gym.Env):
         _sc_state: The spacecraft without fuel
         """
         super(OrekitEnv, self).__init__()
-        # ID for reward/state output files
+        # ID for reward/state output files (Can create better system)
         self.id = random.randint(1,100000)
         self.alg = ""
 
@@ -124,6 +129,7 @@ class OrekitEnv(gym.Env):
         # Accpetance tolerance
         self._orbit_tolerance = {'a': 10000, 'ex': 0.01, 'ey': 0.01, 'hx': 0.001, 'hy': 0.001, 'lv': 0.01}
 
+        # Allows for randomized reset
         self.randomize = False
         self._orbit_randomizer = {'a': 4000.0e3, 'e': 0.2, 'i': 2.0, 'w': 10.0, 'omega': 10.0, 'lv': 5.0}
         self.seed_state = state
@@ -196,12 +202,15 @@ class OrekitEnv(gym.Env):
         """
         a, e, i, omega, raan, lM = state
 
+        # Add Earth size offset
         a += EARTH_RADIUS
+        # Convert to radians
         i = radians(i)
         omega = radians(omega)
         raan = radians(raan)
         lM = radians(lM)
 
+        # Initialize Derivatives 
         aDot, eDot, iDot, paDot, rannDot, anomalyDot = 0.0, 0.0, 0.0, 0.0, 0.0, 0.0
 
         # Set inertial frame
@@ -228,16 +237,13 @@ class OrekitEnv(gym.Env):
         :return:
         """
         sc_state = SpacecraftState(self._orbit, mass)
-        # print(f'{sc_state.getMass()}')
         self._sc_fuel = sc_state.addAdditionalState (FUEL_MASS, fuel_mass)
 
     def create_Propagator(self):
         """
         Creates and initializes the propagator
-        :param prop_master_mode: Set propagator to slave of master mode (slave default)
         :return:
         """
-        # tol = NumericalPropagator.tolerances(1.0, self._orbit, self._orbit.getType())
         minStep = 0.001
         maxStep = 500.0
 
@@ -246,7 +252,6 @@ class OrekitEnv(gym.Env):
         abs_tolerance = JArray_double.cast_(tolerances[0])
         rel_telerance = JArray_double.cast_(tolerances[1])
 
-        # integrator = DormandPrince853Integrator(minStep, maxStep, 1e-5, 1e-10)
         integrator = DormandPrince853Integrator(minStep, maxStep, abs_tolerance, rel_telerance)
 
         integrator.setInitialStepSize(10.0)
@@ -379,7 +384,7 @@ class OrekitEnv(gym.Env):
     def step(self, thrust):
         """
         Take a propagation step
-        :param thrust_mag: Thrust magnitude (Newtons, float)
+        :param thrust: 3D Thrust vector (Newtons, float)
         :return: spacecraft state (np.array), reward value (float), done (bool)
         """
         thrust_mag = np.linalg.norm(thrust)
@@ -405,6 +410,7 @@ class OrekitEnv(gym.Env):
         self._currentOrbit = currentState.getOrbit()
         coord = currentState.getPVCoordinates().getPosition()
 
+        # Saving for post analysis
         self.px.append(coord.getX())
         self.py.append(coord.getY())
         self.pz.append(coord.getZ())
@@ -436,7 +442,7 @@ class OrekitEnv(gym.Env):
                    self._currentOrbit.getEquinoctialEyDot(),
                    self._currentOrbit.getHxDot(), self._currentOrbit.getHyDot()
                    ]
-
+        # OpenAI debug option
         info = {}
 
         self.adot_orbit.append(self._currentOrbit.getADot())
@@ -447,11 +453,10 @@ class OrekitEnv(gym.Env):
 
         return np.array(state_1), reward, done, info
 
-    def dist_reward(self, thrust):
+    def dist_reward(self):
         """
         Computes the reward based on the state of the agent
-        :param thrust: Spacecraft thrust
-        :return: reward value (float)
+        :return: reward value (float), done state (bool)
         """
         # a, ecc, i, w, omega, E, adot, edot, idot, wdot, omegadot, Edot = state
 
@@ -469,7 +474,8 @@ class OrekitEnv(gym.Env):
 
         reward = -(reward_a + reward_hx*10 + reward_hy*10 + reward_ex + reward_ey)
 
-        # Terminal states
+        # TERMINAL STATES
+        # Target state (with tolerance)
         if abs(self.r_target_state[0] - state[0]) <= self._orbit_tolerance['a'] and \
            abs(self.r_target_state[1] - state[1]) <= self._orbit_tolerance['ex'] and \
            abs(self.r_target_state[2] - state[2]) <= self._orbit_tolerance['ey'] and \
@@ -483,30 +489,36 @@ class OrekitEnv(gym.Env):
             self.write_state()
             return reward, done
 
+        # Out of fuel
         if self.cuf_fuel_mass <= 0:
             print('Ran out of fuel')
             done = True
             reward = -1
             return reward, done
 
+        # Crash into Earth
         if self._currentOrbit.getA() < EARTH_RADIUS:
             reward = -1
             done = True
             print('In earth')
             return reward, done
 
+        # Mission duration exceeded
         if self._extrap_Date.compareTo(self.final_date) >= 0:
             reward = -1
             print("Out of time")
-            # self.write_state()
+            # self.write_state() DEBUG
             done = True
 
         self.total_reward += reward
 
         return reward, done
+    
+
+    # State/Action Output files
 
     def write_state(self):
-        # State file
+        # State file (Equinoctial)
         with open("results/state/"+str(self.id)+"_"+self.alg+"_state_equinoctial_"+str(self.episode_num)+".txt", "w") as f:
             #Add episode number line 1
             f.write("Episode: " + str(self.episode_num) + '\n')
@@ -518,7 +530,7 @@ class OrekitEnv(gym.Env):
                     print("Unexpected error")
                     print("Writing '-' in place")
                     f.write('-\n')
-        # State file
+        # State file (Kepler)
         with open("results/state/"+str(self.id)+"_"+self.alg+"_state_kepler_"+str(self.episode_num)+".txt", "w") as f:
             #Add episode number line 1
             f.write("Episode: " + str(self.episode_num) + '\n')

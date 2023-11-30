@@ -15,9 +15,11 @@ num = 1000
 ax_lims = 7000000
 asymtote_limit = 0.99
 
+# Reading in specific Kepler state file
 with open('results/state/28693/28693_TD3_state_kepler_138.txt', 'r') as f:
     lines = f.readlines()[1:]
 
+# Capture data
 data = []
 for i in range(len(lines)):
     a, e, i, omega, Omega, nu = [float(x) for x in lines[i].split(',')]

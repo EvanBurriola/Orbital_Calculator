@@ -20,7 +20,7 @@ from org.orekit.time import AbsoluteDate, TimeScalesFactory
 from org.hipparchus.ode.nonstiff import DormandPrince853Integrator
 from org.hipparchus.geometry.euclidean.threed import Vector3D
 from org.orekit.propagation.numerical import NumericalPropagator
-from org.orekit.orbits import OrbitType, PositionAngle
+from org.orekit.orbits import OrbitType, PositionAngleType #Changed in Orekit=12
 from org.orekit.forces.gravity.potential import GravityFieldFactory
 from org.orekit.forces.gravity import HolmesFeatherstoneAttractionModel
 from org.orekit.utils import IERSConventions, Constants
@@ -216,7 +216,7 @@ class OrekitEnv(gym.Env):
         # Set inertial frame
         set_orbit = KeplerianOrbit(a, e, i, omega, raan, lM,
                                    aDot, eDot, iDot, paDot, rannDot, anomalyDot,
-                                   PositionAngle.TRUE, inertial_frame, date, MU)
+                                   PositionAngleType.TRUE, inertial_frame, date, MU)
           
         if target:
             self._targetOrbit = set_orbit
@@ -261,7 +261,8 @@ class OrekitEnv(gym.Env):
         numProp.setMu(MU)
         numProp.setOrbitType(OrbitType.KEPLERIAN)
 
-        numProp.setSlaveMode()
+        # Default mode! Changed in Orekit=12
+        # numProp.setSlaveMode()
 
         self._prop = numProp
         self._prop.setAttitudeProvider(attitude)
@@ -433,7 +434,7 @@ class OrekitEnv(gym.Env):
         self.thrust_mags.append(thrust_mag)
 
         # Calc reward / termination state for this step
-        reward, done = self.dist_reward(thrust)
+        reward, done = self.dist_reward()
 
         state_1 = [(self._currentOrbit.getA()) / self.r_target_state[0],
                    self._currentOrbit.getEquinoctialEx(), self._currentOrbit.getEquinoctialEy(),
